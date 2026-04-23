@@ -36,6 +36,8 @@
 		<java.version>17</java.version>
 		<spring-cloud.version>2024.0.1</spring-cloud.version>
 		<sonar.organization>alexjhona</sonar.organization>
+		<sonar.projectKey>Alexjhona_ms-producto-prueba</sonar.projectKey>
+		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<dependencies>
