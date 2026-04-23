@@ -1,13 +1,13 @@
 package com.example.ms_producto;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class MsProductoApplicationTests {
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+class MsProductoApplicationTest {
 
 	@Test
-	void contextLoads() {
+	void main_debeEjecutarseSinErrores() {
+		assertDoesNotThrow(() -> MsProductoApplication.main(new String[]{}));
 	}
-
 }
