@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -26,15 +25,15 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     public ProductoDto crearProducto(ProductoDto productoDto) {
-        // Validar categoría existe
         CategoriaDto cat = categoriaClient.obtenerPorId(productoDto.getCategoriaId());
         if (cat == null) {
             throw new IllegalArgumentException("Categoría no existe con id: " + productoDto.getCategoriaId());
         }
-        // Validar código interno único
+
         if (productoRepository.existsByCodigoInterno(productoDto.getCodigoInterno())) {
             throw new IllegalArgumentException("Ya existe un producto con ese código interno");
         }
+
         Producto p = new Producto();
         p.setCategoriaId(productoDto.getCategoriaId());
         p.setCodigoInterno(productoDto.getCodigoInterno());
@@ -58,7 +57,7 @@ public class ProductoServiceImpl implements ProductoService {
     public List<ProductoDto> listarProductos() {
         return productoRepository.findAll().stream()
                 .map(this::mapToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -66,14 +65,13 @@ public class ProductoServiceImpl implements ProductoService {
         Producto existente = productoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
 
-        // Si cambió categoria, validar nuevamente
         if (!existente.getCategoriaId().equals(productoDto.getCategoriaId())) {
             CategoriaDto cat = categoriaClient.obtenerPorId(productoDto.getCategoriaId());
             if (cat == null) {
                 throw new IllegalArgumentException("Categoría no existe con id: " + productoDto.getCategoriaId());
             }
         }
-        // Si cambió código interno, validar unicidad
+
         if (!existente.getCodigoInterno().equals(productoDto.getCodigoInterno())
                 && productoRepository.existsByCodigoInterno(productoDto.getCodigoInterno())) {
             throw new IllegalArgumentException("Ya existe otro producto con ese código interno");
@@ -89,7 +87,6 @@ public class ProductoServiceImpl implements ProductoService {
         Producto actualizado = productoRepository.save(existente);
         return mapToDto(actualizado);
     }
-    
 
     @Override
     public void eliminarProducto(Long id) {

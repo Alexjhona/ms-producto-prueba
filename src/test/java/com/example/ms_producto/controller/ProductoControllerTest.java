@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +33,7 @@ class ProductoControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private ProductoService productoService;
 
     private ProductoDto crearDto() {
@@ -50,7 +52,7 @@ class ProductoControllerTest {
     void crear_debeRetornarProductoCreado() throws Exception {
         ProductoDto dto = crearDto();
 
-        when(productoService.crearProducto(org.mockito.ArgumentMatchers.any(ProductoDto.class))).thenReturn(dto);
+        when(productoService.crearProducto(any(ProductoDto.class))).thenReturn(dto);
 
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -60,7 +62,7 @@ class ProductoControllerTest {
                 .andExpect(jsonPath("$.codigoInterno").value("P001"))
                 .andExpect(jsonPath("$.nombre").value("Mouse Gamer"));
 
-        verify(productoService).crearProducto(org.mockito.ArgumentMatchers.any(ProductoDto.class));
+        verify(productoService).crearProducto(any(ProductoDto.class));
     }
 
     @Test
@@ -96,8 +98,7 @@ class ProductoControllerTest {
         ProductoDto dto = crearDto();
         dto.setNombre("Mouse Actualizado");
 
-        when(productoService.actualizarProducto(org.mockito.ArgumentMatchers.eq(1L),
-                org.mockito.ArgumentMatchers.any(ProductoDto.class))).thenReturn(dto);
+        when(productoService.actualizarProducto(eq(1L), any(ProductoDto.class))).thenReturn(dto);
 
         mockMvc.perform(put("/api/productos/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,8 +106,7 @@ class ProductoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nombre").value("Mouse Actualizado"));
 
-        verify(productoService).actualizarProducto(org.mockito.ArgumentMatchers.eq(1L),
-                org.mockito.ArgumentMatchers.any(ProductoDto.class));
+        verify(productoService).actualizarProducto(eq(1L), any(ProductoDto.class));
     }
 
     @Test
