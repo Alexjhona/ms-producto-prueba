@@ -18,6 +18,6 @@ class OpenApiConfigTest {
         assertNotNull(openAPI.getInfo());
         assertEquals("OPEN API MICROSERVICIO PRODUCTO", openAPI.getInfo().getTitle());
         assertEquals("0.0.1", openAPI.getInfo().getVersion());
-        assertEquals("servicios web producto", openAPI.getInfo().getDescription());
+        assertEquals("Documentacion de endpoints para registrar, consultar, actualizar, eliminar productos y administrar precios de venta.", openAPI.getInfo().getDescription());
     }
 }

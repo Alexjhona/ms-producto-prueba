@@ -3,6 +3,7 @@ package com.example.ms_producto.service.impl;
 import com.example.ms_producto.dto.CategoriaDto;
 import com.example.ms_producto.dto.ProductoDto;
 import com.example.ms_producto.entity.Producto;
+import com.example.ms_producto.exception.ProductoNoEncontradoException;
 import com.example.ms_producto.feign.CategoriaClient;
 import com.example.ms_producto.repository.ProductoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,8 +123,8 @@ class ProductoServiceImplTest {
     void obtenerProducto_debeLanzarExcepcionCuandoNoExiste() {
         when(productoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        ProductoNoEncontradoException ex = assertThrows(
+                ProductoNoEncontradoException.class,
                 () -> productoService.obtenerProducto(1L)
         );
 
@@ -205,8 +206,8 @@ class ProductoServiceImplTest {
     void actualizarProducto_debeLanzarExcepcionCuandoProductoNoExiste() {
         when(productoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        ProductoNoEncontradoException ex = assertThrows(
+                ProductoNoEncontradoException.class,
                 () -> productoService.actualizarProducto(1L, productoDto)
         );
 
@@ -280,12 +281,12 @@ class ProductoServiceImplTest {
     void eliminarProducto_debeLanzarExcepcionCuandoNoExiste() {
         when(productoRepository.existsById(1L)).thenReturn(false);
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        ProductoNoEncontradoException ex = assertThrows(
+                ProductoNoEncontradoException.class,
                 () -> productoService.eliminarProducto(1L)
         );
 
-        assertEquals("No existe producto con id: 1", ex.getMessage());
+        assertEquals("Producto no encontrado con id: 1", ex.getMessage());
         verify(productoRepository).existsById(1L);
         verify(productoRepository, never()).deleteById(any(Long.class));
     }

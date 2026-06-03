@@ -14,7 +14,7 @@ public class OpenApiConfig {
         return new OpenAPI().info(new Info()
                 .title("OPEN API MICROSERVICIO PRODUCTO")
                 .version("0.0.1")
-                .description("servicios web producto")
+                .description("Documentacion de endpoints para registrar, consultar, actualizar, eliminar productos y administrar precios de venta.")
                 .termsOfService("http://swagger.io/terms")
                 .license(new License().name("Apache 2.0").url("http://springdoc.org"))
         );

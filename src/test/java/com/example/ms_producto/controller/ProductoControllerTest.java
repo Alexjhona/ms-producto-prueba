@@ -1,6 +1,7 @@
 package com.example.ms_producto.controller;
 
 import com.example.ms_producto.dto.ProductoDto;
+import com.example.ms_producto.exception.ProductoNoEncontradoException;
 import com.example.ms_producto.service.ProductoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,9 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -66,6 +69,27 @@ class ProductoControllerTest {
     }
 
     @Test
+    void crear_conCamposVacios_debeRetornarBadRequest() throws Exception {
+        ProductoDto dto = new ProductoDto();
+        dto.setCodigoInterno("");
+        dto.setNombre("");
+
+        mockMvc.perform(post("/api/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validación fallida"))
+                .andExpect(jsonPath("$.mensajes.categoriaId").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.codigoInterno").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.nombre").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.precioVenta").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.precioCompra").value("Campo obligatorio"));
+
+        verifyNoInteractions(productoService);
+    }
+
+    @Test
     void obtener_debeRetornarProducto() throws Exception {
         ProductoDto dto = crearDto();
 
@@ -77,6 +101,18 @@ class ProductoControllerTest {
                 .andExpect(jsonPath("$.nombre").value("Mouse Gamer"));
 
         verify(productoService).obtenerProducto(1L);
+    }
+
+    @Test
+    void obtener_cuandoNoExiste_debeRetornarNotFound() throws Exception {
+        when(productoService.obtenerProducto(99L)).thenThrow(new ProductoNoEncontradoException(99L));
+
+        mockMvc.perform(get("/api/productos/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.mensaje").value("Producto no encontrado con id: 99"));
+
+        verify(productoService).obtenerProducto(99L);
     }
 
     @Test
@@ -110,6 +146,43 @@ class ProductoControllerTest {
     }
 
     @Test
+    void actualizar_conCamposVacios_debeRetornarBadRequest() throws Exception {
+        ProductoDto dto = new ProductoDto();
+        dto.setCodigoInterno(" ");
+        dto.setNombre(" ");
+
+        mockMvc.perform(put("/api/productos/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validación fallida"))
+                .andExpect(jsonPath("$.mensajes.categoriaId").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.codigoInterno").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.nombre").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.precioVenta").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.mensajes.precioCompra").value("Campo obligatorio"));
+
+        verifyNoInteractions(productoService);
+    }
+
+    @Test
+    void actualizar_conPrecioInvalido_debeRetornarBadRequest() throws Exception {
+        ProductoDto dto = crearDto();
+        dto.setPrecioVenta(0.0);
+
+        mockMvc.perform(put("/api/productos/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Validación fallida"))
+                .andExpect(jsonPath("$.mensajes.precioVenta").value("Debe ser mayor a cero"));
+
+        verifyNoInteractions(productoService);
+    }
+
+    @Test
     void eliminar_debeRetornarNoContent() throws Exception {
         doNothing().when(productoService).eliminarProducto(1L);
 
@@ -117,6 +190,18 @@ class ProductoControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(productoService).eliminarProducto(1L);
+    }
+
+    @Test
+    void eliminar_cuandoNoExiste_debeRetornarNotFound() throws Exception {
+        doThrow(new ProductoNoEncontradoException(99L)).when(productoService).eliminarProducto(99L);
+
+        mockMvc.perform(delete("/api/productos/99"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.mensaje").value("Producto no encontrado con id: 99"));
+
+        verify(productoService).eliminarProducto(99L);
     }
 
     @Test

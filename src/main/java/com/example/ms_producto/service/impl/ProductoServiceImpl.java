@@ -3,6 +3,7 @@ package com.example.ms_producto.service.impl;
 import com.example.ms_producto.dto.CategoriaDto;
 import com.example.ms_producto.dto.ProductoDto;
 import com.example.ms_producto.entity.Producto;
+import com.example.ms_producto.exception.ProductoNoEncontradoException;
 import com.example.ms_producto.feign.CategoriaClient;
 import com.example.ms_producto.repository.ProductoRepository;
 import com.example.ms_producto.service.ProductoService;
@@ -49,7 +50,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public ProductoDto obtenerProducto(Long id) {
         Producto p = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
         return mapToDto(p);
     }
 
@@ -63,7 +64,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public ProductoDto actualizarProducto(Long id, ProductoDto productoDto) {
         Producto existente = productoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
 
         if (!existente.getCategoriaId().equals(productoDto.getCategoriaId())) {
             CategoriaDto cat = categoriaClient.obtenerPorId(productoDto.getCategoriaId());
@@ -91,7 +92,7 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     public void eliminarProducto(Long id) {
         if (!productoRepository.existsById(id)) {
-            throw new IllegalArgumentException("No existe producto con id: " + id);
+            throw new ProductoNoEncontradoException(id);
         }
         productoRepository.deleteById(id);
     }

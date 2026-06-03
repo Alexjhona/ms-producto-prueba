@@ -4,7 +4,6 @@ import com.example.ms_producto.dto.CategoriaDto;
 import com.example.ms_producto.dto.ProductoDto;
 import com.example.ms_producto.entity.Producto;
 import com.example.ms_producto.repository.ProductoRepository;
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -114,15 +111,13 @@ class ProductoControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("GET /api/productos/{id} propaga error cuando no existe")
-    void obtenerProducto_CuandoNoExiste_PropagaError() {
-        ServletException exception = assertThrows(ServletException.class, () ->
-                mockMvc.perform(get("/api/productos/{id}", 99999L)
-                        .accept(MediaType.APPLICATION_JSON)));
-
-        assertThat(exception.getCause())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Producto no encontrado con id: 99999");
+    @DisplayName("GET /api/productos/{id} retorna 404 cuando no existe")
+    void obtenerProducto_CuandoNoExiste_RetornaNotFound() throws Exception {
+        mockMvc.perform(get("/api/productos/{id}", 99999L)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.mensaje").value("Producto no encontrado con id: 99999"));
     }
 
     private ProductoDto productoDto(String codigoInterno, String nombre, Long categoriaId) {
