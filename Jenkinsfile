@@ -8,36 +8,21 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Test') {
+        stage('Build & Test (JaCoCo)') {
             steps {
                 sh '''
-                    echo "Ejecutando pruebas unitarias, pruebas de controlador y pruebas integrales para ms-producto-prueba..."
+                    echo "Ejecutando compilación, pruebas y verificación con Maven..."
                     if [ -f "./mvnw" ]; then
                       chmod +x ./mvnw
-                      ./mvnw -B clean test
+                      ./mvnw -B clean verify
                     else
-                      mvn -B clean test
-                    fi
-                '''
-            }
-        }
-
-        stage('Verify and JaCoCo') {
-            steps {
-                sh '''
-                    echo "Ejecutando verificación Maven y generando reporte de cobertura JaCoCo para ms-producto-prueba..."
-                    if [ -f "./mvnw" ]; then
-                      chmod +x ./mvnw
-                      ./mvnw -B verify
-                    else
-                      mvn -B verify
+                      mvn -B clean verify
                     fi
 
                     echo "Verificando existencia del reporte JaCoCo..."
@@ -78,7 +63,7 @@ pipeline {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     script {
-                        def qg = waitForQualityGate abortPipeline: false
+                        def qg = waitForQualityGate abortPipeline: true
                         echo "Resultado Quality Gate: ${qg.status}"
                     }
                 }
@@ -114,13 +99,11 @@ pipeline {
         always {
             echo 'Pipeline backend ms-producto-prueba finalizado.'
         }
-
         success {
             echo 'Microservicio ms-producto-prueba compilado, probado, analizado en SonarQube y empaquetado correctamente.'
         }
-
         failure {
-            echo 'El pipeline de ms-producto-prueba falló. Revisar Console Output para identificar la etapa exacta.'
+            echo 'El pipeline falló. Revisar Console Output para identificar la etapa exacta.'
         }
     }
 }
