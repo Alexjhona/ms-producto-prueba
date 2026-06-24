@@ -3,6 +3,7 @@ package com.example.ms_producto.dto;
 public class CategoriaDto {
     private Long id;
     private String nombre;
+    private String imagen;
 
     public CategoriaDto() {
         // Constructor vacío requerido para deserialización JSON.
@@ -22,5 +23,13 @@ public class CategoriaDto {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }

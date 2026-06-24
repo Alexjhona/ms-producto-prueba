@@ -30,6 +30,10 @@ public class Producto {
     @Column(nullable = false)
     private String nombre;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    private String imagen;
+
     @NotNull
     @Column(name = "precio_venta", nullable = false)
     private Double precioVenta;

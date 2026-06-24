@@ -3,6 +3,7 @@ package com.example.ms_producto.service.impl;
 import com.example.ms_producto.dto.CategoriaDto;
 import com.example.ms_producto.dto.ProductoDto;
 import com.example.ms_producto.entity.Producto;
+import com.example.ms_producto.exception.ConflictoRecursoException;
 import com.example.ms_producto.exception.ProductoNoEncontradoException;
 import com.example.ms_producto.feign.CategoriaClient;
 import com.example.ms_producto.repository.ProductoRepository;
@@ -32,13 +33,14 @@ public class ProductoServiceImpl implements ProductoService {
         }
 
         if (productoRepository.existsByCodigoInterno(productoDto.getCodigoInterno())) {
-            throw new IllegalArgumentException("Ya existe un producto con ese código interno");
+            throw new ConflictoRecursoException("Ya existe un producto con ese código interno");
         }
 
         Producto p = new Producto();
         p.setCategoriaId(productoDto.getCategoriaId());
         p.setCodigoInterno(productoDto.getCodigoInterno());
         p.setNombre(productoDto.getNombre());
+        p.setImagen(productoDto.getImagen());
         p.setPrecioVenta(productoDto.getPrecioVenta());
         p.setPrecioCompra(productoDto.getPrecioCompra());
         p.setMoneda(productoDto.getMoneda());
@@ -75,12 +77,13 @@ public class ProductoServiceImpl implements ProductoService {
 
         if (!existente.getCodigoInterno().equals(productoDto.getCodigoInterno())
                 && productoRepository.existsByCodigoInterno(productoDto.getCodigoInterno())) {
-            throw new IllegalArgumentException("Ya existe otro producto con ese código interno");
+            throw new ConflictoRecursoException("Ya existe otro producto con ese código interno");
         }
 
         existente.setCategoriaId(productoDto.getCategoriaId());
         existente.setCodigoInterno(productoDto.getCodigoInterno());
         existente.setNombre(productoDto.getNombre());
+        existente.setImagen(productoDto.getImagen());
         existente.setPrecioVenta(productoDto.getPrecioVenta());
         existente.setPrecioCompra(productoDto.getPrecioCompra());
         existente.setMoneda(productoDto.getMoneda());
@@ -103,6 +106,7 @@ public class ProductoServiceImpl implements ProductoService {
         dto.setCategoriaId(p.getCategoriaId());
         dto.setCodigoInterno(p.getCodigoInterno());
         dto.setNombre(p.getNombre());
+        dto.setImagen(p.getImagen());
         dto.setPrecioVenta(p.getPrecioVenta());
         dto.setPrecioCompra(p.getPrecioCompra());
         dto.setMoneda(p.getMoneda());

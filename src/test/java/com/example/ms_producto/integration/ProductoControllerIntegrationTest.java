@@ -36,6 +36,7 @@ class ProductoControllerIntegrationTest extends BaseIntegrationTest {
     @DisplayName("POST /api/productos crea producto y lo persiste")
     void crearProducto_RetornaOk() throws Exception {
         ProductoDto request = productoDto("P001", "Mouse Gamer", 10L);
+        request.setImagen("mouse.png");
 
         mockMvc.perform(post("/api/productos")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -45,9 +46,46 @@ class ProductoControllerIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.categoriaId").value(10L))
                 .andExpect(jsonPath("$.codigoInterno").value("P001"))
                 .andExpect(jsonPath("$.nombre").value("Mouse Gamer"))
+                .andExpect(jsonPath("$.imagen").value("mouse.png"))
                 .andExpect(jsonPath("$.precioVenta").value(120.0))
                 .andExpect(jsonPath("$.precioCompra").value(90.0))
                 .andExpect(jsonPath("$.moneda").value("Soles"));
+    }
+
+    @Test
+    @DisplayName("POST /api/productos retorna 400 cuando el request es invalido")
+    void crearProducto_CuandoRequestEsInvalido_RetornaBadRequest() throws Exception {
+        ProductoDto request = new ProductoDto();
+        request.setCodigoInterno("");
+        request.setNombre("");
+
+        mockMvc.perform(post("/api/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.mensaje").value("Se encontraron errores de validación"))
+                .andExpect(jsonPath("$.errores.categoriaId").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.codigoInterno").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.nombre").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.precioVenta").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.precioCompra").value("Campo obligatorio"));
+    }
+
+    @Test
+    @DisplayName("POST /api/productos retorna 409 cuando codigo interno ya existe")
+    void crearProducto_CuandoCodigoInternoExiste_RetornaConflict() throws Exception {
+        guardarProducto("P001", "Mouse Existente", 10L);
+        ProductoDto request = productoDto("P001", "Mouse Repetido", 10L);
+
+        mockMvc.perform(post("/api/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.mensaje").value("El registro ya existe o genera conflicto"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos"));
     }
 
     @Test
@@ -117,7 +155,9 @@ class ProductoControllerIntegrationTest extends BaseIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.mensaje").value("Producto no encontrado con id: 99999"));
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.mensaje").value("No se encontró el recurso solicitado"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos/99999"));
     }
 
     private ProductoDto productoDto(String codigoInterno, String nombre, Long categoriaId) {

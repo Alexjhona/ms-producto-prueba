@@ -24,6 +24,8 @@ public class ProductoDto {
     @NotBlank(message = "Campo obligatorio")
     private String nombre;
 
+    private String imagen;
+
     @NotNull(message = "Campo obligatorio")
     @Positive(message = "Debe ser mayor a cero")
     private Double precioVenta;

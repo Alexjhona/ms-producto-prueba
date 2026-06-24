@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("tc")
-@DisplayName("Pruebas de integracion - ProductoRepository con MySQL real")
+@ActiveProfiles("test")
+@DisplayName("Pruebas de integracion - ProductoRepository con MySQL en Docker")
 class ProductoRepositoryIntegrationTest {
 
     @DynamicPropertySource

@@ -3,6 +3,7 @@ package com.example.ms_producto.service.impl;
 import com.example.ms_producto.dto.CategoriaDto;
 import com.example.ms_producto.dto.ProductoDto;
 import com.example.ms_producto.entity.Producto;
+import com.example.ms_producto.exception.ConflictoRecursoException;
 import com.example.ms_producto.exception.ProductoNoEncontradoException;
 import com.example.ms_producto.feign.CategoriaClient;
 import com.example.ms_producto.repository.ProductoRepository;
@@ -43,6 +44,7 @@ class ProductoServiceImplTest {
         producto.setCategoriaId(10L);
         producto.setCodigoInterno("P001");
         producto.setNombre("Mouse Gamer");
+        producto.setImagen("mouse.png");
         producto.setPrecioVenta(120.0);
         producto.setPrecioCompra(90.0);
         producto.setMoneda("Soles");
@@ -52,6 +54,7 @@ class ProductoServiceImplTest {
         productoDto.setCategoriaId(10L);
         productoDto.setCodigoInterno("P001");
         productoDto.setNombre("Mouse Gamer");
+        productoDto.setImagen("mouse.png");
         productoDto.setPrecioVenta(120.0);
         productoDto.setPrecioCompra(90.0);
         productoDto.setMoneda("Soles");
@@ -72,6 +75,7 @@ class ProductoServiceImplTest {
         assertNotNull(resultado);
         assertEquals("P001", resultado.getCodigoInterno());
         assertEquals("Mouse Gamer", resultado.getNombre());
+        assertEquals("mouse.png", resultado.getImagen());
         verify(categoriaClient).obtenerPorId(10L);
         verify(productoRepository).existsByCodigoInterno("P001");
         verify(productoRepository).save(any(Producto.class));
@@ -96,8 +100,8 @@ class ProductoServiceImplTest {
         when(categoriaClient.obtenerPorId(10L)).thenReturn(categoriaDto);
         when(productoRepository.existsByCodigoInterno("P001")).thenReturn(true);
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        ConflictoRecursoException ex = assertThrows(
+                ConflictoRecursoException.class,
                 () -> productoService.crearProducto(productoDto)
         );
 
@@ -139,6 +143,7 @@ class ProductoServiceImplTest {
         producto2.setCategoriaId(20L);
         producto2.setCodigoInterno("P002");
         producto2.setNombre("Teclado");
+        producto2.setImagen("teclado.png");
         producto2.setPrecioVenta(150.0);
         producto2.setPrecioCompra(100.0);
         producto2.setMoneda("Soles");
@@ -150,6 +155,7 @@ class ProductoServiceImplTest {
         assertNotNull(resultado);
         assertEquals(2, resultado.size());
         assertEquals("P001", resultado.get(0).getCodigoInterno());
+        assertEquals("mouse.png", resultado.get(0).getImagen());
         assertEquals("P002", resultado.get(1).getCodigoInterno());
         verify(productoRepository).findAll();
     }
@@ -175,6 +181,7 @@ class ProductoServiceImplTest {
         nuevoDto.setCategoriaId(99L);
         nuevoDto.setCodigoInterno("P001");
         nuevoDto.setNombre("Mouse Gamer");
+        nuevoDto.setImagen("mouse-nuevo.png");
         nuevoDto.setPrecioVenta(120.0);
         nuevoDto.setPrecioCompra(90.0);
         nuevoDto.setMoneda("Soles");
@@ -187,6 +194,7 @@ class ProductoServiceImplTest {
         productoActualizado.setCategoriaId(99L);
         productoActualizado.setCodigoInterno("P001");
         productoActualizado.setNombre("Mouse Gamer");
+        productoActualizado.setImagen("mouse-nuevo.png");
         productoActualizado.setPrecioVenta(120.0);
         productoActualizado.setPrecioCompra(90.0);
         productoActualizado.setMoneda("Soles");
@@ -197,6 +205,7 @@ class ProductoServiceImplTest {
 
         assertNotNull(resultado);
         assertEquals(99L, resultado.getCategoriaId());
+        assertEquals("mouse-nuevo.png", resultado.getImagen());
         verify(productoRepository).findById(1L);
         verify(categoriaClient).obtenerPorId(99L);
         verify(productoRepository).save(any(Producto.class));
@@ -223,6 +232,7 @@ class ProductoServiceImplTest {
         nuevoDto.setCategoriaId(99L);
         nuevoDto.setCodigoInterno("P001");
         nuevoDto.setNombre("Mouse Gamer");
+        nuevoDto.setImagen("mouse.png");
         nuevoDto.setPrecioVenta(120.0);
         nuevoDto.setPrecioCompra(90.0);
         nuevoDto.setMoneda("Soles");
@@ -248,6 +258,7 @@ class ProductoServiceImplTest {
         nuevoDto.setCategoriaId(10L);
         nuevoDto.setCodigoInterno("P999");
         nuevoDto.setNombre("Mouse Gamer");
+        nuevoDto.setImagen("mouse.png");
         nuevoDto.setPrecioVenta(120.0);
         nuevoDto.setPrecioCompra(90.0);
         nuevoDto.setMoneda("Soles");
@@ -255,8 +266,8 @@ class ProductoServiceImplTest {
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
         when(productoRepository.existsByCodigoInterno("P999")).thenReturn(true);
 
-        IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
+        ConflictoRecursoException ex = assertThrows(
+                ConflictoRecursoException.class,
                 () -> productoService.actualizarProducto(1L, nuevoDto)
         );
 

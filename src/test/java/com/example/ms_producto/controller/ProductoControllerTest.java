@@ -45,6 +45,7 @@ class ProductoControllerTest {
         dto.setCategoriaId(10L);
         dto.setCodigoInterno("P001");
         dto.setNombre("Mouse Gamer");
+        dto.setImagen("mouse.png");
         dto.setPrecioVenta(120.0);
         dto.setPrecioCompra(90.0);
         dto.setMoneda("Soles");
@@ -63,7 +64,8 @@ class ProductoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.codigoInterno").value("P001"))
-                .andExpect(jsonPath("$.nombre").value("Mouse Gamer"));
+                .andExpect(jsonPath("$.nombre").value("Mouse Gamer"))
+                .andExpect(jsonPath("$.imagen").value("mouse.png"));
 
         verify(productoService).crearProducto(any(ProductoDto.class));
     }
@@ -78,13 +80,18 @@ class ProductoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Validación fallida"))
-                .andExpect(jsonPath("$.mensajes.categoriaId").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.codigoInterno").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.nombre").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.precioVenta").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.precioCompra").value("Campo obligatorio"));
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.mensaje").value("Se encontraron errores de validación"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos"))
+                .andExpect(jsonPath("$.datosRecibidos.codigoInterno").value(""))
+                .andExpect(jsonPath("$.datosRecibidos.nombre").value(""))
+                .andExpect(jsonPath("$.errores.categoriaId").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.codigoInterno").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.nombre").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.precioVenta").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.precioCompra").value("Campo obligatorio"));
 
         verifyNoInteractions(productoService);
     }
@@ -109,8 +116,11 @@ class ProductoControllerTest {
 
         mockMvc.perform(get("/api/productos/99"))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.mensaje").value("Producto no encontrado con id: 99"));
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.mensaje").value("No se encontró el recurso solicitado"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos/99"));
 
         verify(productoService).obtenerProducto(99L);
     }
@@ -155,13 +165,18 @@ class ProductoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Validación fallida"))
-                .andExpect(jsonPath("$.mensajes.categoriaId").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.codigoInterno").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.nombre").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.precioVenta").value("Campo obligatorio"))
-                .andExpect(jsonPath("$.mensajes.precioCompra").value("Campo obligatorio"));
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.mensaje").value("Se encontraron errores de validación"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos/1"))
+                .andExpect(jsonPath("$.datosRecibidos.codigoInterno").value(" "))
+                .andExpect(jsonPath("$.datosRecibidos.nombre").value(" "))
+                .andExpect(jsonPath("$.errores.categoriaId").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.codigoInterno").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.nombre").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.precioVenta").value("Campo obligatorio"))
+                .andExpect(jsonPath("$.errores.precioCompra").value("Campo obligatorio"));
 
         verifyNoInteractions(productoService);
     }
@@ -175,11 +190,81 @@ class ProductoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.error").value("Validación fallida"))
-                .andExpect(jsonPath("$.mensajes.precioVenta").value("Debe ser mayor a cero"));
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.mensaje").value("Se encontraron errores de validación"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos/1"))
+                .andExpect(jsonPath("$.datosRecibidos.precioVenta").value(0.0))
+                .andExpect(jsonPath("$.errores.precioVenta").value("Debe ser mayor a cero"));
 
         verifyNoInteractions(productoService);
+    }
+
+    @Test
+    void actualizar_conTipoDeDatoInvalido_debeRetornarBadRequest() throws Exception {
+        String request = """
+                {
+                  "categoriaId": 10,
+                  "codigoInterno": "P001",
+                  "nombre": "Mouse Gamer",
+                  "precioVenta": "abc",
+                  "precioCompra": 90.0,
+                  "moneda": "Soles"
+                }
+                """;
+
+        mockMvc.perform(put("/api/productos/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("Bad Request"))
+                .andExpect(jsonPath("$.mensaje").value("Se encontraron errores de validación"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos/1"))
+                .andExpect(jsonPath("$.datosRecibidos.precioVenta").value("abc"))
+                .andExpect(jsonPath("$.errores.precioVenta").value("Tipo de dato inválido o estructura incorrecta"));
+
+        verifyNoInteractions(productoService);
+    }
+
+    @Test
+    void crear_cuandoHayConflicto_debeRetornarConflict() throws Exception {
+        ProductoDto dto = crearDto();
+        when(productoService.crearProducto(any(ProductoDto.class)))
+                .thenThrow(new IllegalArgumentException("Ya existe un producto con ese código interno"));
+
+        mockMvc.perform(post("/api/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"))
+                .andExpect(jsonPath("$.mensaje").value("El registro ya existe o genera conflicto"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos"))
+                .andExpect(jsonPath("$.datosRecibidos").isMap())
+                .andExpect(jsonPath("$.errores").isMap());
+
+        verify(productoService).crearProducto(any(ProductoDto.class));
+    }
+
+    @Test
+    void listar_cuandoOcurreErrorInesperado_debeRetornarInternalServerError() throws Exception {
+        when(productoService.listarProductos()).thenThrow(new RuntimeException("Falla inesperada"));
+
+        mockMvc.perform(get("/api/productos"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(500))
+                .andExpect(jsonPath("$.error").value("Internal Server Error"))
+                .andExpect(jsonPath("$.mensaje").value("Ocurrió un error inesperado en el servidor"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos"))
+                .andExpect(jsonPath("$.datosRecibidos").isMap())
+                .andExpect(jsonPath("$.errores").isMap());
+
+        verify(productoService).listarProductos();
     }
 
     @Test
@@ -198,8 +283,11 @@ class ProductoControllerTest {
 
         mockMvc.perform(delete("/api/productos/99"))
                 .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.mensaje").value("Producto no encontrado con id: 99"));
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.mensaje").value("No se encontró el recurso solicitado"))
+                .andExpect(jsonPath("$.ruta").value("/api/productos/99"));
 
         verify(productoService).eliminarProducto(99L);
     }

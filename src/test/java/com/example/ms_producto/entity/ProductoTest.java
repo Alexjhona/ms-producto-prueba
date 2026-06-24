@@ -14,6 +14,7 @@ class ProductoTest {
         producto.setCategoriaId(10L);
         producto.setCodigoInterno("P001");
         producto.setNombre("Mouse");
+        producto.setImagen("mouse.png");
         producto.setPrecioVenta(120.0);
         producto.setPrecioCompra(90.0);
         producto.setMoneda("Soles");
@@ -22,6 +23,7 @@ class ProductoTest {
         assertEquals(10L, producto.getCategoriaId());
         assertEquals("P001", producto.getCodigoInterno());
         assertEquals("Mouse", producto.getNombre());
+        assertEquals("mouse.png", producto.getImagen());
         assertEquals(120.0, producto.getPrecioVenta());
         assertEquals(90.0, producto.getPrecioCompra());
         assertEquals("Soles", producto.getMoneda());
