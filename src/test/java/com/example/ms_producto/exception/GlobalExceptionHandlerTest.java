@@ -93,8 +93,8 @@ class GlobalExceptionHandlerTest {
                 "/api/productos"
         );
 
-        assertThat(response.getBody().get("datosRecibidos"))
-                .isEqualTo(target);
+        assertThat(response.getBody())
+                .containsEntry("datosRecibidos", target);
 
         assertThat(errores(response))
                 .containsEntry(
@@ -187,8 +187,8 @@ class GlobalExceptionHandlerTest {
                         request
                 );
 
-        assertThat(response.getBody().get("datosRecibidos"))
-                .isEqualTo("{\"precioVenta\":}");
+        assertThat(response.getBody())
+                .containsEntry("datosRecibidos", "{\"precioVenta\":}");
 
         assertThat(errores(response))
                 .containsEntry(
@@ -222,8 +222,9 @@ class GlobalExceptionHandlerTest {
                         request
                 );
 
-        assertThat(response.getBody().get("datosRecibidos"))
-                .isEqualTo(
+        assertThat(response.getBody())
+                .containsEntry(
+                        "datosRecibidos",
                         Map.of("nombre", "Teclado")
                 );
 
@@ -568,8 +569,8 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<Map<String, Object>> response =
                 handler.manejarBodyInvalido(exception, request);
 
-        assertThat(response.getBody().get("datosRecibidos"))
-                .isEqualTo(Map.of());
+        assertThat(response.getBody())
+                .containsEntry("datosRecibidos", Map.of());
     }
 
     @Test
