@@ -34,6 +34,9 @@ import java.util.Objects;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String DATOS_RECIBIDOS = "datosRecibidos";
+    private static final String ERRORES = "errores";
+
     private static final String MENSAJE_VALIDACION = "Se encontraron errores de validación";
     private static final String MENSAJE_NOT_FOUND = "No se encontró el recurso solicitado";
     private static final String MENSAJE_CONFLICT = "El registro ya existe o genera conflicto";
@@ -57,8 +60,8 @@ public class GlobalExceptionHandler {
                 .forEach(error -> errores.putIfAbsent(error.getObjectName(), mensajeClaro(error.getDefaultMessage())));
 
         Map<String, Object> response = baseResponse(HttpStatus.BAD_REQUEST, MENSAJE_VALIDACION, request);
-        response.put("datosRecibidos", datosRecibidos(request, exception.getBindingResult().getTarget()));
-        response.put("errores", errores);
+        response.put(DATOS_RECIBIDOS, datosRecibidos(request, exception.getBindingResult().getTarget()));
+        response.put(ERRORES, errores);
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -71,8 +74,8 @@ public class GlobalExceptionHandler {
         errores.put(campoDesdeJsonMapping(exception), mensajeBodyInvalido(exception));
 
         Map<String, Object> response = baseResponse(HttpStatus.BAD_REQUEST, MENSAJE_VALIDACION, request);
-        response.put("datosRecibidos", datosRecibidos(request, null));
-        response.put("errores", errores);
+        response.put(DATOS_RECIBIDOS, datosRecibidos(request, null));
+        response.put(ERRORES, errores);
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -86,8 +89,8 @@ public class GlobalExceptionHandler {
                 errores.putIfAbsent(nombreCampo(violation.getPropertyPath().toString()), mensajeClaro(violation.getMessage())));
 
         Map<String, Object> response = baseResponse(HttpStatus.BAD_REQUEST, MENSAJE_VALIDACION, request);
-        response.put("datosRecibidos", datosRecibidos(request, null));
-        response.put("errores", errores);
+        response.put(DATOS_RECIBIDOS, datosRecibidos(request, null));
+        response.put(ERRORES, errores);
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -105,8 +108,8 @@ public class GlobalExceptionHandler {
         }
 
         Map<String, Object> response = baseResponse(HttpStatus.BAD_REQUEST, MENSAJE_VALIDACION, request);
-        response.put("datosRecibidos", datosRecibidos(request, null));
-        response.put("errores", errores);
+        response.put(DATOS_RECIBIDOS, datosRecibidos(request, null));
+        response.put(ERRORES, errores);
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -175,8 +178,8 @@ public class GlobalExceptionHandler {
         response.put("error", status.getReasonPhrase());
         response.put("mensaje", mensaje);
         response.put("ruta", request.getRequestURI());
-        response.put("datosRecibidos", new LinkedHashMap<>());
-        response.put("errores", new LinkedHashMap<>());
+        response.put(DATOS_RECIBIDOS, new LinkedHashMap<>());
+        response.put(ERRORES, new LinkedHashMap<>());
 
         return response;
     }
